@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="810" viewBox="0 0 1080 810" role="img" aria-label="大学英语综合教程 2">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c8599"/><stop offset="1" stop-color="#66d9e8"/>
+    </linearGradient>
+    <linearGradient id="spine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#000" stop-opacity="0.16"/><stop offset="1" stop-color="#000" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="810" fill="url(#bg)"/>
+  <circle cx="960" cy="120" r="210" fill="#ffffff" opacity="0.10"/>
+  <circle cx="120" cy="720" r="260" fill="#000000" opacity="0.06"/>
+  <g transform="translate(90,75)">
+    <rect width="900" height="660" rx="30" fill="#ffffff" opacity="0.95"/>
+    <rect width="26" height="660" rx="13" fill="url(#spine)"/>
+  </g>
+  <text x="120" y="150" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="30" fill="#868e96">教材实拍图（示例 · 图 2）</text>
+  <text text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="84" font-weight="700" fill="#212529"><tspan x="540" y="300">大学英语综合教程 2</tspan></text>
+  <text x="540" y="470" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="40" fill="#495057">李荫华</text>
+  <text x="540" y="530" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="32" fill="#868e96">上海外语教育出版社</text>
+  <g transform="translate(150,600)">
+    <rect width="330" height="70" rx="35" fill="#0c8599" opacity="0.14"/>
+    <text x="165" y="46" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="32" fill="#0c8599">课程：大学英语</text>
+  </g>
+  <g transform="translate(600,600)">
+    <rect width="330" height="70" rx="35" fill="#000000" opacity="0.06"/>
+    <text x="165" y="46" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, Helvetica, Arial, sans-serif" font-size="32" fill="#495057">成色：全新</text>
+  </g>
+</svg>

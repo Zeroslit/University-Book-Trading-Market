@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="810" viewBox="0 0 1080 810" role="img" aria-label="帖子配图示例">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#495057"/><stop offset="1" stop-color="#adb5bd"/></linearGradient></defs>
+  <rect width="1080" height="810" fill="url(#bg)"/>
+  <text text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="56" font-weight="700" fill="#ffffff"><tspan x="540" y="360">求购《大学英语综合教程 2》</tspan><tspan x="540" y="430">教材</tspan></text>
+  <text x="540" y="520" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="30" fill="#ffffff" opacity="0.8">校园实拍图（示例）</text>
+</svg>

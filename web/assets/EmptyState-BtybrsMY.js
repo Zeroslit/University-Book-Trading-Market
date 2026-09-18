@@ -1,0 +1,1 @@
+import{a as o,c as n,b as e,t as s,a2 as c}from"./index-BPta2ZzO.js";const r={class:"empty"},i={style:{"font-size":"28px"}},d={__name:"EmptyState",props:{text:{type:String,default:"暂无数据"},icon:{type:String,default:"📭"}},setup(t){return(a,l)=>(o(),n("div",r,[e("div",i,s(t.icon),1),e("p",null,s(t.text),1),c(a.$slots,"default")]))}};export{d as _};
