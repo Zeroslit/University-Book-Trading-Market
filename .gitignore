@@ -1,0 +1,22 @@
+# 依赖
+node_modules/
+# 环境变量（含密钥，禁止提交）
+.env
+.env.local
+server/.env
+web/.env.local
+# 构建产物
+dist/
+.vite/
+# 上传文件（运行时产生，库中只存 URL）
+server/uploads/
+!server/uploads/.gitkeep
+# 日志与临时文件
+*.log
+logs/
+npm-debug.log*
+.DS_Store
+Thumbs.db
+coverage/
+.idea/
+.vscode/

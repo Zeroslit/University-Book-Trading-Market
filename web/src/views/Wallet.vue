@@ -1,0 +1,169 @@
+<template>
+  <div>
+    <div class="card">
+      <div class="row-between wrap">
+        <div>
+          <div class="small muted">可用余额</div>
+          <div class="price" style="font-size:26px">¥{{ yuan(account?.balanceCents) }}</div>
+          <div class="small muted">
+            冻结金额 ¥{{ yuan(account?.frozenCents) }} · 信誉档位 {{ account?.creditTier }} ·
+            提现{{ account?.withdrawInstant ? '即时到账' : `延迟 ${account?.withdrawDelayHours} 小时` }}
+          </div>
+        </div>
+        <div class="chips">
+          <button class="btn btn-sm" @click="showRecharge = !showRecharge">模拟充值</button>
+          <button class="btn btn-sm btn-primary" @click="showWithdraw = !showWithdraw">提现</button>
+          <RouterLink class="btn btn-sm" to="/payment-accounts">收款绑定</RouterLink>
+        </div>
+      </div>
+
+      <div v-if="showRecharge" class="card mt12">
+        <div class="bold">模拟充值（一期不接入真实支付）</div>
+        <label>金额（元）</label>
+        <input v-model.trim="rechargeAmount" type="number" min="1" max="5000" step="0.01" />
+        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="recharge">确认充值</button>
+      </div>
+
+      <div v-if="showWithdraw" class="card mt12">
+        <div class="bold">提现（必须已绑定收款方式且通过学生认证）</div>
+        <label>金额（元）</label>
+        <input v-model.trim="withdrawAmount" type="number" min="1" step="0.01" />
+        <label>收款方式</label>
+        <select v-model="withdrawAccountId">
+          <option value="">请选择已绑定的收款方式</option>
+          <option v-for="a in paymentAccounts" :key="a.id" :value="a.id">
+            {{ a.typeLabel }} {{ a.accountMask }}{{ a.isDefault ? '（默认）' : '' }}
+          </option>
+        </select>
+        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="withdraw">提交提现</button>
+        <p class="small muted mt8">资金流向会写入流水表，可按订单号追溯。</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="bold">提现记录</div>
+      <table class="table mt8">
+        <thead><tr><th>提现单号</th><th>金额</th><th>状态</th><th>到账方式</th><th>预计到账</th><th>申请时间</th></tr></thead>
+        <tbody>
+          <tr v-for="w in withdrawals" :key="w.id">
+            <td class="small">{{ w.withdraw_no }}</td>
+            <td>¥{{ yuan(w.amount_cents) }}</td>
+            <td>{{ w.status }}</td>
+            <td>{{ w.arrival_type === 'instant' ? '即时' : '延迟' }}</td>
+            <td class="small">{{ formatTime(w.expect_at) }}</td>
+            <td class="small">{{ formatTime(w.created_at) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="row-between">
+        <div class="bold">资金明细（全部留痕）</div>
+        <select v-model="bizType" style="width:auto" @change="loadTransactions(1)">
+          <option value="">全部业务类型</option>
+          <option value="recharge">充值</option>
+          <option value="order_hold">下单托管</option>
+          <option value="order_release">放款</option>
+          <option value="refund">退款</option>
+          <option value="fee">服务费</option>
+          <option value="withdraw">提现</option>
+        </select>
+      </div>
+      <table class="table mt8">
+        <thead><tr><th>流水号</th><th>账户</th><th>方向</th><th>金额</th><th>业务</th><th>余额</th><th>时间</th></tr></thead>
+        <tbody>
+          <tr v-for="t in transactions" :key="t.id">
+            <td class="small">{{ t.tx_no }}</td>
+            <td>{{ t.account }}</td>
+            <td>{{ t.direction === 'in' ? '入账' : '出账' }}</td>
+            <td>¥{{ yuan(t.amount_cents) }}</td>
+            <td>{{ t.biz_type }}</td>
+            <td>{{ yuan(t.balance_after_cents) }}</td>
+            <td class="small">{{ formatTime(t.created_at) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <Pager :page="page" :page-size="pageSize" :total="total" :has-more="hasMore" @change="loadTransactions" />
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue';
+import { walletApi, paymentAccountApi } from '../api/index.js';
+import { centsToYuan, formatTime, yuanToCents } from '../utils/format.js';
+import { toastError, toastOk } from '../utils/toast.js';
+import { useAuthStore } from '../stores/auth.js';
+import Pager from '../components/Pager.vue';
+
+const auth = useAuthStore();
+const account = ref(null);
+const transactions = ref([]);
+const withdrawals = ref([]);
+const paymentAccounts = ref([]);
+const showRecharge = ref(false);
+const showWithdraw = ref(false);
+const rechargeAmount = ref('100');
+const withdrawAmount = ref('');
+const withdrawAccountId = ref('');
+const bizType = ref('');
+const busy = ref(false);
+const page = ref(1);
+const pageSize = 20;
+const total = ref(0);
+const hasMore = ref(false);
+const yuan = centsToYuan;
+
+async function loadAll() {
+  account.value = await walletApi.account();
+  withdrawals.value = (await walletApi.withdrawals({ pageSize: 10 })).list;
+  paymentAccounts.value = await paymentAccountApi.list();
+  await loadTransactions(1);
+}
+
+async function loadTransactions(nextPage = page.value) {
+  page.value = nextPage;
+  const data = await walletApi.transactions({ page: page.value, pageSize, bizType: bizType.value || undefined });
+  transactions.value = data.list;
+  total.value = data.total;
+  hasMore.value = data.hasMore;
+}
+
+async function recharge() {
+  const amountCents = yuanToCents(rechargeAmount.value);
+  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError('充值金额至少 1 元'); return; }
+  busy.value = true;
+  try {
+    await walletApi.recharge({ amountCents });
+    toastOk('充值成功（模拟）');
+    showRecharge.value = false;
+    await loadAll();
+    await auth.refreshWallet();
+  } catch (err) {
+    toastError(err?.message || '充值失败');
+  } finally {
+    busy.value = false;
+  }
+}
+
+async function withdraw() {
+  const amountCents = yuanToCents(withdrawAmount.value);
+  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError('提现金额至少 1 元'); return; }
+  if (!withdrawAccountId.value) { toastError('请选择收款方式'); return; }
+  busy.value = true;
+  try {
+    const data = await walletApi.withdraw({ amountCents, paymentAccountId: Number(withdrawAccountId.value) });
+    toastOk(data.arrivalType === 'instant' ? '提现申请已提交，预计即时到账' : '提现申请已提交，将延迟到账');
+    showWithdraw.value = false;
+    await loadAll();
+    await auth.refreshWallet();
+  } catch (err) {
+    toastError(err?.message || '提现失败');
+  } finally {
+    busy.value = false;
+  }
+}
+
+onMounted(loadAll);
+</script>

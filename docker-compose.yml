@@ -1,0 +1,129 @@
+# 一键启动：MySQL 8 + Redis 7 + API + Web(Nginx)
+# 用法：cp .env.example .env && docker compose up -d --build
+# 首次启动会由 db-init 执行迁移与种子数据（3 校 / 9 学生 / 10 教材 / 5 帖 / 2 订单 / 1 工单 / 1 待审认证）
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: campus-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-campus_book}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=caching_sha2_password
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7-alpine
+    container_name: campus-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # 一次性任务：建表 + 种子数据（可重复执行）
+  db-init:
+    build:
+      context: ./server
+    container_name: campus-db-init
+    restart: "no"
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      DB_NAME: ${MYSQL_DATABASE:-campus_book}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me}
+      AES_KEY: ${AES_KEY:-dev-aes-key-32-bytes-length!!!}
+      HMAC_SECRET: ${HMAC_SECRET:-dev-hmac-secret-change-me}
+      REDIS_ENABLED: "false"
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      SMS_DEV_CODE: ${SMS_DEV_CODE:-123456}
+      PAYMENT_MOCK: "true"
+      WECHAT_MOCK: "true"
+    command: ["sh", "-c", "node src/db/migrate.js && node src/db/seed.js"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  server:
+    build:
+      context: ./server
+    container_name: campus-server
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      DB_NAME: ${MYSQL_DATABASE:-campus_book}
+      REDIS_ENABLED: "true"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-dev-only-jwt-secret-change-me}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-2h}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-7d}
+      AES_KEY: ${AES_KEY:-dev-aes-key-32-bytes-length!!!}
+      HMAC_SECRET: ${HMAC_SECRET:-dev-hmac-secret-change-me}
+      SMS_PROVIDER: ${SMS_PROVIDER:-console}
+      SMS_DEV_CODE: ${SMS_DEV_CODE:-123456}
+      PAYMENT_MOCK: "true"
+      WECHAT_MOCK: "true"
+      UPLOAD_DIR: uploads
+      UPLOAD_PUBLIC_BASE: /static
+      UPLOAD_MAX_MB: 5
+      JOBS_ENABLED: "true"
+      JOBS_TICK_SECONDS: 60
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      db-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  web:
+    build:
+      context: ./web
+    container_name: campus-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    depends_on:
+      server:
+        condition: service_started
+
+volumes:
+  mysql-data:
+  redis-data:
+  uploads:
