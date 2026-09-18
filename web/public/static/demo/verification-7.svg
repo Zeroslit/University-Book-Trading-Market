@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="810" viewBox="0 0 1080 810" role="img" aria-label="学生证示例">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b8a3e"/><stop offset="1" stop-color="#8ce99a"/></linearGradient></defs>
+  <rect width="1080" height="810" fill="#f1f3f5"/>
+  <rect x="60" y="60" width="960" height="690" rx="28" fill="url(#bg)"/>
+  <rect x="110" y="150" width="860" height="510" rx="20" fill="#ffffff" opacity="0.94"/>
+  <rect x="150" y="200" width="220" height="280" rx="12" fill="#dee2e6"/>
+  <text x="260" y="355" text-anchor="middle" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="34" fill="#868e96">证件照</text>
+  <text x="420" y="270" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="40" font-weight="700" fill="#212529">学生证（示例材料）</text>
+  <text x="420" y="340" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="30" fill="#495057">姓名：演示同学</text>
+  <text x="420" y="400" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="30" fill="#495057">学号：20******07</text>
+  <text x="420" y="460" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="30" fill="#495057">院系：示例学院</text>
+  <text x="160" y="620" font-family="PingFang SC, Microsoft YaHei, sans-serif" font-size="28" fill="#868e96">仅用于演示，非真实证件</text>
+</svg>

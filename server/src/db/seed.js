@@ -1,12 +1,14 @@
 // 种子数据：3 所高校 / 每校 3 名学生 / 10 本教材 / 5 个帖子及评论 /
 //           2 笔不同状态的托管订单 / 1 个进行中的客服工单 / 1 个待审核的学生认证
 // 用法：node src/db/seed.js
+import path from 'node:path';
 import mysql from 'mysql2/promise';
 import { config } from '../config/index.js';
 import { logger } from '../lib/logger.js';
 import { encrypt, hmac, hashPassword, generateNo } from '../lib/crypto.js';
 import { maskStudentNo, maskBankCard, maskName } from '../lib/mask.js';
 import { normalizeText } from '../lib/normalize.js';
+import { writeDemoImages } from '../lib/demo-images.js';
 
 const PASSWORD = 'Test@123456';
 
@@ -164,6 +166,9 @@ const STUDENTS = [
   [2, '2023010103', '13800000009', '高远（成理）', 'approved', 100],
 ];
 
+// 成色中文名（用于生成演示封面图）
+const CONDITION_LABELS = { new: '全新', like_new: '九成新', good: '八成新', fair: '七成新', poor: '五成新' };
+
 // [学校下标, 校内卖家下标, 书名, 作者, 出版社, ISBN, 课程, 成色, 原价(分), 售价(分), 备注]
 const BOOKS = [
   [0, 0, '高等数学（上册）第七版', '同济大学数学系', '高等教育出版社', '9787040396638', '高等数学A', 'like_new', 4980, 2000, '只翻过前两章，无笔记'],
@@ -303,7 +308,7 @@ async function main() {
       await conn.query(
         `INSERT INTO user_verifications (user_id, school_id, method, student_card_image_url, status, reviewer_id, review_note, reviewed_at)
          VALUES (?, ?, 'student_card', ?, ?, ?, ?, ?)`,
-        [studentIds[i], schoolIds[STUDENTS[i][0]], `/static/demo/verification-${i + 1}.jpg`, status,
+        [studentIds[i], schoolIds[STUDENTS[i][0]], `/static/demo/verification-${i + 1}.svg`, status,
           status === 'pending' ? null : adminId,
           status === 'pending' ? null : '信息与学生证一致',
           status === 'pending' ? null : hours(-24)],
@@ -323,6 +328,12 @@ async function main() {
     );
 
     // 6) 图书 + 图片
+    // 生成演示封面图片文件（与库中 URL 对应，避免封面 404）
+    writeDemoImages({
+      dir: path.resolve(process.cwd(), config.upload.dir, 'demo'),
+      books: BOOKS.map((b) => ({ title: b[2], author: b[3], publisher: b[4], course: b[6], condition: CONDITION_LABELS[b[7]] || b[7] })),
+      threadTitle: THREADS[1][3],
+    });
     const bookIds = [];
     for (let i = 0; i < BOOKS.length; i += 1) {
       const [schoolIdx, localSeller, title, author, publisher, isbn, course, condition, original, price, remark] = BOOKS[i];
@@ -339,7 +350,7 @@ async function main() {
         await conn.query(
           `INSERT INTO book_images (book_id, school_id, url, sort_order, width, height, size_bytes, ocr_status)
            VALUES (?, ?, ?, ?, 1080, 810, 210000, 'skipped')`,
-          [r.insertId, schoolIds[schoolIdx], `/static/demo/book-${i + 1}-${k}.jpg`, k],
+          [r.insertId, schoolIds[schoolIdx], `/static/demo/book-${i + 1}-${k}.svg`, k],
         );
       }
     }
@@ -373,7 +384,7 @@ async function main() {
     }
     await conn.query(
       `INSERT INTO thread_images (thread_id, school_id, url, sort_order) VALUES (?, ?, ?, 1)`,
-      [threadIds[1], schoolIds[0], '/static/demo/thread-2-1.jpg'],
+      [threadIds[1], schoolIds[0], '/static/demo/thread-2-1.svg'],
     );
 
     // 8) 私信：买家（陈默）就《高等数学》联系卖家（林晓）

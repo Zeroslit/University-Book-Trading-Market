@@ -6,6 +6,24 @@
 
 ---
 
+## 零、在线演示（无需安装，打开即用）
+
+**👉 <https://zeroslit.github.io/University-Book-Trading-Market/>** —— 进入后点「进入在线演示」
+
+直达演示应用：**<https://zeroslit.github.io/University-Book-Trading-Market/web/>**
+
+- 这是**纯静态演示版**：前端 +「浏览器内模拟后端」（`web/src/demo/`），不需要 Node / MySQL / Redis，数据为种子数据库快照。
+- 能力与真实部署一致：多校隔离、图书库、论坛、私信、下单资金托管、放款与退款、信誉分与处罚梯度、四级违禁词、工单 SLA、AI 客服、管理后台都可点、可走通。
+- 所有写操作只作用于浏览器内存（localStorage），**不会写入任何数据库**；支付、短信、微信授权均为模拟实现。
+- 登录页提供「演示环境 · 一键切换角色」：三所高校的学生、学校管理员、人工客服、平台管理员。
+- 分享链接可直接进入指定角色，例如 `/web/login?demo=13800000001`（学生）、`?demo=13900000003`（平台管理员）。
+- 顶部「重置演示数据」可恢复初始种子状态。
+
+> 模拟后端的路径、参数、错误码与真实后端**一一对应**（直接复用 `server/src/lib/` 的文本归一化、违禁词匹配、状态机、分页与错误码），
+> 因此页面代码零改动即可在「真实后端」与「纯静态演示」两种模式下运行：`web/src/api/client.js` 依据 `VITE_DEMO` 切换请求通道。
+
+---
+
 ## 一、技术栈与架构
 
 | 层 | 技术 |
@@ -28,6 +46,7 @@
 ```
 
 后端目录：`server/src/{config,lib,db,middleware,services,modules,jobs}`，前端目录：`web/src/{api,stores,router,components,views,utils,styles}`。
+演示版目录：`web/src/demo/{server.js,store.js,rules.js,words.js,handlers/*,dataset.js}`（浏览器内模拟后端，与真实接口同契约）。
 完整目录说明见 `docs/03-目录结构.md`。
 
 ---
@@ -70,6 +89,28 @@ npm run dev                   # http://127.0.0.1:5173
 cd server && npm test         # 57 项单元 + 集成测试（需 MySQL）
 cd web && npm run build       # 生产构建
 ```
+
+### 纯静态演示版构建与发布
+
+演示模式由环境变量开关控制，不影响本地开发与生产构建：
+
+```bash
+cd web
+
+# 1) 本地预览演示版（浏览器内模拟后端，不需要启动 Node / MySQL）
+VITE_DEMO=true npm run dev
+#    Windows PowerShell: $env:VITE_DEMO='true'; npm run dev
+
+# 2) 构建 GitHub Pages 子路径演示版（base 必须指向站点子路径，否则路由与静态资源会 404）
+VITE_DEMO=true VITE_BASE=/University-Book-Trading-Market/web/ npm run build
+#    PowerShell: $env:VITE_DEMO='true'; $env:VITE_BASE='/University-Book-Trading-Market/web/'; npm run build
+#    产物：web/dist（自动包含 web/public/static/demo 下的演示封面图）
+
+# 3) 刷新演示数据集：从种子数据库导出到 web/src/demo/dataset.js，并同步演示封面图
+node scripts/build-demo-dataset.mjs   # 需先执行 cd server && npm run db:reset
+```
+
+发布方式：把 `web/dist` 的内容放到 `gh-pages` 分支的 `web/` 目录，并在分支根目录放置 `.nojekyll`（否则以 `_` 开头的文件名会被 Jekyll 忽略）；仓库 Pages 发布源指向 `gh-pages` 分支根目录。分支根目录的 `404.html` 是 SPA 兜底页，用于让 `/web/login` 这类深链接可直接打开。
 
 ### 种子数据与演示账号
 

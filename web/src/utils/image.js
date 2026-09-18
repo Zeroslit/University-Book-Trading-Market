@@ -44,8 +44,12 @@ export async function compressImage(file, { maxEdge = MAX_EDGE, quality = DEFAUL
 }
 
 // 图片地址补全：后端返回的是 /static/... 相对地址
+// 演示模式（子路径部署）下需要补上构建基路径，例如 /University-Book-Trading-Market/web/static/...
+const BASE_URL = import.meta.env.BASE_URL || '/';
+
 export function imageUrl(url) {
   if (!url) return '';
-  if (/^(https?:)?\/\//.test(url) || url.startsWith('data:')) return url;
+  if (/^(https?:)?\/\//.test(url) || url.startsWith('data:') || url.startsWith('blob:')) return url;
+  if (String(import.meta.env.VITE_DEMO) === 'true') return BASE_URL + (url.startsWith('/') ? url.slice(1) : url);
   return url.startsWith('/') ? url : `/${url}`;
 }

@@ -44,8 +44,9 @@ const routes = [
   { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('../views/NotFound.vue'), meta: { public: true, title: '页面不存在' } },
 ];
 
+// 基路径跟随 Vite 的 base：本地开发为 /，GitHub Pages 演示为 /<repo>/web/
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior: () => ({ top: 0 }),
 });

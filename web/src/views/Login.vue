@@ -27,16 +27,33 @@
         <div>校管：13900000001 · 客服：13900000002 · 平台管理员：13900000003</div>
         <div>开发环境短信验证码固定为 123456</div>
       </div>
+
+      <div v-if="isDemo" class="card mt16" style="text-align:left">
+        <div class="bold">演示环境 · 一键切换角色</div>
+        <p class="small muted" style="margin:6px 0">
+          这是纯静态演示版：界面与真实平台一致，但数据只保存在你的浏览器本地，支付、短信、微信授权均为模拟实现，
+          请勿填写真实银行卡号或密码。可在任意页面顶部「重置演示数据」恢复初始状态。
+        </p>
+        <div class="chips">
+          <button
+            v-for="account in demoAccounts"
+            :key="account.phone"
+            class="chip"
+            :disabled="loading"
+            @click="quickLogin(account)"
+          >{{ account.label }}</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth.js';
 import { authApi } from '../api/index.js';
-import { setTokens } from '../api/client.js';
+import { setTokens, IS_DEMO } from '../api/client.js';
 import { toastError } from '../utils/toast.js';
 
 const auth = useAuthStore();
@@ -45,6 +62,25 @@ const route = useRoute();
 const form = reactive({ phone: '13800000001', password: 'Test@123456' });
 const loading = ref(false);
 const error = ref('');
+const isDemo = IS_DEMO;
+
+// 演示环境快捷登录：与种子数据一一对应，点击即进入对应角色的学校视图
+const demoAccounts = [
+  { label: '林晓 · 江南大学（已认证，卖家）', phone: '13800000001' },
+  { label: '陈默 · 江南大学（有托管中订单）', phone: '13800000002' },
+  { label: '王雨 · 江南大学（认证待审核）', phone: '13800000003' },
+  { label: '孙晴 · 郑州轻工业大学（信誉 90）', phone: '13800000005' },
+  { label: '郑一 · 成都理工大学（信誉 72）', phone: '13800000008' },
+  { label: '江南大学校园大使（校管）', phone: '13900000001' },
+  { label: '人工客服小助手（客服）', phone: '13900000002' },
+  { label: '平台运营（平台管理员）', phone: '13900000003' },
+];
+
+async function quickLogin(account) {
+  form.phone = account.phone;
+  form.password = 'Test@123456';
+  await submit();
+}
 
 async function submit() {
   error.value = '';
@@ -63,6 +99,14 @@ async function submit() {
   }
 }
 
+// 演示环境支持分享链接直接进入某个角色：/login?demo=13800000001
+onMounted(async () => {
+  const phone = String(route.query.demo || '');
+  if (!isDemo || !/^1[3-9]\d{9}$/.test(phone)) return;
+  const account = demoAccounts.find((a) => a.phone === phone) || { phone, label: phone };
+  await quickLogin(account);
+});
+
 async function wechatLogin() {
   loading.value = true;
   try {
@@ -80,5 +124,5 @@ async function wechatLogin() {
 
 <style scoped>
 .auth-wrap { display: flex; justify-content: center; padding: 40px 16px; }
-.auth-card { width: min(100%, 420px); }
+.auth-card { width: min(100%, 460px); }
 </style>
