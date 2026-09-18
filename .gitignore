@@ -9,7 +9,7 @@ web/.env.local
 dist/
 .vite/
 # 上传文件（运行时产生，库中只存 URL）
-server/uploads/
+server/uploads/*
 !server/uploads/.gitkeep
 # 日志与临时文件
 *.log
@@ -20,3 +20,4 @@ Thumbs.db
 coverage/
 .idea/
 .vscode/
+
