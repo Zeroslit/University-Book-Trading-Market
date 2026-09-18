@@ -36,10 +36,10 @@
         <div>
           <label>排序</label>
           <select v-model="filters.sort" @change="reload(1)">
-            <option value="createdAt:desc">最新发布</option>
-            <option value="price:asc">价格从低到高</option>
-            <option value="price:desc">价格从高到低</option>
-            <option value="views:desc">最多浏览</option>
+            <option value="-createdAt">最新发布</option>
+            <option value="price">价格从低到高</option>
+            <option value="-price">价格从高到低</option>
+            <option value="-views">最多浏览</option>
           </select>
         </div>
       </div>
@@ -78,6 +78,7 @@ import { onMounted, reactive, ref } from 'vue';
 import { bookApi } from '../api/index.js';
 import { useAuthStore } from '../stores/auth.js';
 import { CONDITION_LABELS, centsToYuan } from '../utils/format.js';
+import { toastError } from '../utils/toast.js';
 import { imageUrl } from '../utils/image.js';
 import EmptyState from '../components/EmptyState.vue';
 import Pager from '../components/Pager.vue';
@@ -89,29 +90,38 @@ const page = ref(1);
 const pageSize = 20;
 const hasMore = ref(false);
 const yuan = centsToYuan;
-const filters = reactive({ keyword: '', course: '', condition: '', minPrice: '', maxPrice: '', sort: 'createdAt:desc', crossSchool: false });
+const filters = reactive({ keyword: '', course: '', condition: '', minPrice: '', maxPrice: '', sort: '-createdAt', crossSchool: false });
 
 async function reload(nextPage = page.value) {
   page.value = nextPage;
-  const data = await bookApi.list({
-    page: page.value, pageSize,
-    keyword: filters.keyword || undefined,
-    course: filters.course || undefined,
-    condition: filters.condition || undefined,
-    minPrice: filters.minPrice ? Number(filters.minPrice) * 100 : undefined,
-    maxPrice: filters.maxPrice ? Number(filters.maxPrice) * 100 : undefined,
-    sort: filters.sort,
-    crossSchool: filters.crossSchool ? 'true' : undefined,
-  });
-  list.value = data.list;
-  total.value = data.total;
-  hasMore.value = data.hasMore;
+  try {
+    const data = await bookApi.list({
+      page: page.value, pageSize,
+      keyword: filters.keyword || undefined,
+      course: filters.course || undefined,
+      condition: filters.condition || undefined,
+      minPrice: filters.minPrice ? Number(filters.minPrice) * 100 : undefined,
+      maxPrice: filters.maxPrice ? Number(filters.maxPrice) * 100 : undefined,
+      // 后端排序格式：字段名（升序）或 -字段名（降序），只允许白名单字段
+      sort: filters.sort,
+      crossSchool: filters.crossSchool ? 'true' : undefined,
+    });
+    list.value = data.list;
+    total.value = data.total;
+    hasMore.value = data.hasMore;
+  } catch (err) {
+    list.value = [];
+    total.value = 0;
+    hasMore.value = false;
+    toastError(err?.message || '教材列表加载失败');
+  }
 }
 
 function reset() {
-  Object.assign(filters, { keyword: '', course: '', condition: '', minPrice: '', maxPrice: '', sort: 'createdAt:desc', crossSchool: false });
+  Object.assign(filters, { keyword: '', course: '', condition: '', minPrice: '', maxPrice: '', sort: '-createdAt', crossSchool: false });
   reload(1);
 }
 
 onMounted(() => reload(1));
 </script>
+
