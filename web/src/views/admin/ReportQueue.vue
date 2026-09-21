@@ -1,27 +1,26 @@
 <template>
   <div>
     <div class="card">
-      <div class="bold">投诉裁定与申诉复审</div>
+      <div class="bold">{{ $t('投诉裁定与申诉复审') }}</div>
       <p class="small muted">
-        链路：举报 → 受理（通知被投诉人 48 小时内举证）→ 裁定 → 处罚 + 扣分 → 通知双方 → 3 天申诉期 → 复审。
-        只有「裁定成立」的投诉才计入违规次数。
+        {{ $t('链路：举报 → 受理（通知被投诉人 48 小时内举证）→ 裁定 → 处罚 + 扣分 → 通知双方 → 3 天申诉期 → 复审。 只有「裁定成立」的投诉才计入违规次数。') }}
       </p>
       <div class="chips">
         <select v-model="status" style="width:auto" @change="load">
-          <option value="">全部状态</option>
-          <option value="pending">待受理</option>
-          <option value="accepted">已受理（举证中）</option>
-          <option value="decided">已裁定</option>
-          <option value="rejected">不予受理</option>
+          <option value="">{{ $t('全部状态') }}</option>
+          <option value="pending">{{ $t('待受理') }}</option>
+          <option value="accepted">{{ $t('已受理（举证中）') }}</option>
+          <option value="decided">{{ $t('已裁定') }}</option>
+          <option value="rejected">{{ $t('不予受理') }}</option>
         </select>
-        <span class="chip">裁定成立 {{ stats?.validReports ?? 0 }} 起</span>
-        <span class="chip">生效处罚 {{ stats?.activePenalties ?? 0 }} 条</span>
+        <span class="chip">{{ $t('裁定成立 {0} 起', [stats?.validReports ?? 0]) }}</span>
+        <span class="chip">{{ $t('生效处罚 {0} 条', [stats?.activePenalties ?? 0]) }}</span>
       </div>
     </div>
 
     <div class="card">
       <table class="table">
-        <thead><tr><th>编号</th><th>对象</th><th>原因</th><th>状态</th><th>严重度</th><th>裁定</th><th>举证截止</th><th>操作</th></tr></thead>
+        <thead><tr><th>{{ $t('编号') }}</th><th>{{ $t('对象') }}</th><th>{{ $t('原因') }}</th><th>{{ $t('状态') }}</th><th>{{ $t('严重度') }}</th><th>{{ $t('裁定') }}</th><th>{{ $t('举证截止') }}</th><th>{{ $t('操作') }}</th></tr></thead>
         <tbody>
           <tr v-for="r in list" :key="r.id">
             <td class="small">{{ r.report_no }}</td>
@@ -31,75 +30,72 @@
             <td class="small">{{ r.severity }}</td>
             <td class="small">{{ r.decision || '—' }}</td>
             <td class="small">{{ formatTime(r.proof_deadline_at) }}</td>
-            <td><button class="btn btn-sm" @click="open(r.id)">查看 / 裁定</button></td>
+            <td><button class="btn btn-sm" @click="open(r.id)">{{ $t('查看 / 裁定') }}</button></td>
           </tr>
         </tbody>
       </table>
-      <EmptyState v-if="list.length === 0" text="暂无投诉" icon="🚨" />
+      <EmptyState v-if="list.length === 0" :text="$t('暂无投诉')" icon="🚨" />
     </div>
 
     <div v-if="detail" class="card">
       <div class="row-between">
-        <div class="bold">投诉 {{ detail.report_no }}</div>
-        <button class="btn btn-sm" @click="detail = null">关闭</button>
+        <div class="bold">{{ $t('投诉 {0}', [detail.report_no]) }}</div>
+        <button class="btn btn-sm" @click="detail = null">{{ $t('关闭') }}</button>
       </div>
-      <div class="small muted mt8">
-        举报人 #{{ detail.reporter_id }} · 被投诉人 #{{ detail.target_user_id }} ·
-        {{ detail.target_type }}#{{ detail.target_id }} · {{ detail.reason }}
-      </div>
+      <div class="small muted mt8">{{ $t('举报人 #{0} · 被投诉人 #{1} · {2}#{3} · {4}', [detail.reporter_id, detail.target_user_id, detail.target_type, detail.target_id, detail.reason]) }}</div>
       <p class="small" style="white-space:pre-wrap">{{ detail.description }}</p>
       <div v-if="detail.evidence?.length" class="chips mt8">
-        <a v-for="(e, i) in detail.evidence" :key="i" :href="imageUrl(e)" target="_blank" class="chip">证据 {{ i + 1 }}</a>
+        <a v-for="(e, i) in detail.evidence" :key="i" :href="imageUrl(e)" target="_blank" class="chip">{{ $t('证据 {0}', [i + 1]) }}</a>
       </div>
 
       <div class="chips mt12">
-        <button v-if="detail.status === 'pending'" class="btn btn-sm btn-primary" @click="accept">受理投诉</button>
+        <button v-if="detail.status === 'pending'" class="btn btn-sm btn-primary" @click="accept">{{ $t('受理投诉') }}</button>
       </div>
 
       <div class="card mt12">
-        <div class="bold">裁定</div>
+        <div class="bold">{{ $t('裁定') }}</div>
         <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
           <div>
-            <label>裁定结果</label>
+            <label>{{ $t('裁定结果') }}</label>
             <select v-model="decideForm.decision">
-              <option value="valid">成立</option>
-              <option value="invalid">不成立</option>
+              <option value="valid">{{ $t('成立') }}</option>
+              <option value="invalid">{{ $t('不成立') }}</option>
             </select>
           </div>
           <div>
-            <label>严重度</label>
+            <label>{{ $t('严重度') }}</label>
             <select v-model="decideForm.severity">
-              <option value="light">轻度</option>
-              <option value="serious">较严重</option>
-              <option value="severe">严重（一票）</option>
+              <option value="light">{{ $t('轻度') }}</option>
+              <option value="serious">{{ $t('较严重') }}</option>
+              <option value="severe">{{ $t('严重（一票）') }}</option>
             </select>
           </div>
           <div>
-            <label>处罚类型（留空则按累计次数自动梯度）</label>
+            <label>{{ $t('处罚类型（留空则按累计次数自动梯度）') }}</label>
             <select v-model="decideForm.type">
-              <option value="">自动梯度</option>
-              <option value="warning">站内警告</option>
-              <option value="mute">禁言</option>
-              <option value="trade_ban">禁止交易</option>
-              <option value="login_ban">禁止登录</option>
-              <option v-if="auth.isPlatformAdmin" value="permanent_ban">永久封禁</option>
+              <option value="">{{ $t('自动梯度') }}</option>
+              <option value="warning">{{ $t('站内警告') }}</option>
+              <option value="mute">{{ $t('禁言') }}</option>
+              <option value="trade_ban">{{ $t('禁止交易') }}</option>
+              <option value="login_ban">{{ $t('禁止登录') }}</option>
+              <option v-if="auth.isPlatformAdmin" value="permanent_ban">{{ $t('永久封禁') }}</option>
             </select>
           </div>
           <div>
-            <label>天数（可空）</label>
+            <label>{{ $t('天数（可空）') }}</label>
             <input v-model.trim="decideForm.days" type="number" min="0" />
           </div>
         </div>
-        <label>裁定说明（会通知双方）</label>
+        <label>{{ $t('裁定说明（会通知双方）') }}</label>
         <textarea v-model.trim="decideForm.note" maxlength="500" />
-        <button class="btn btn-primary btn-sm mt8" @click="decide">提交裁定</button>
+        <button class="btn btn-primary btn-sm mt8" @click="decide">{{ $t('提交裁定') }}</button>
       </div>
     </div>
 
     <div class="card">
-      <div class="bold">申诉复审</div>
+      <div class="bold">{{ $t('申诉复审') }}</div>
       <table class="table mt8">
-        <thead><tr><th>申诉单号</th><th>用户</th><th>处罚 ID</th><th>理由</th><th>状态</th><th>操作</th></tr></thead>
+        <thead><tr><th>{{ $t('申诉单号') }}</th><th>{{ $t('用户') }}</th><th>{{ $t('处罚 ID') }}</th><th>{{ $t('理由') }}</th><th>{{ $t('状态') }}</th><th>{{ $t('操作') }}</th></tr></thead>
         <tbody>
           <tr v-for="a in appeals" :key="a.id">
             <td class="small">{{ a.appeal_no }}</td>
@@ -109,19 +105,20 @@
             <td><StatusTag :map="APPEAL_STATUS" :value="a.status" /></td>
             <td>
               <template v-if="a.status === 'pending'">
-                <button class="btn btn-sm btn-primary" @click="reviewAppeal(a, true)">通过并撤销处罚</button>
-                <button class="btn btn-sm" @click="reviewAppeal(a, false)">驳回</button>
+                <button class="btn btn-sm btn-primary" @click="reviewAppeal(a, true)">{{ $t('通过并撤销处罚') }}</button>
+                <button class="btn btn-sm" @click="reviewAppeal(a, false)">{{ $t('驳回') }}</button>
               </template>
             </td>
           </tr>
         </tbody>
       </table>
-      <EmptyState v-if="appeals.length === 0" text="暂无申诉" icon="⚖️" />
+      <EmptyState v-if="appeals.length === 0" :text="$t('暂无申诉')" icon="⚖️" />
     </div>
   </div>
 </template>
 
 <script setup>
+import { t } from '../../i18n/index.js';
 import { onMounted, reactive, ref, watch } from 'vue';
 import { reportApi } from '../../api/index.js';
 import { APPEAL_STATUS, REPORT_STATUS, formatTime } from '../../utils/format.js';
@@ -152,23 +149,23 @@ async function open(id) {
   try {
     detail.value = await reportApi.detail(id);
   } catch (err) {
-    toastError(err?.message || '加载投诉失败');
+    toastError(err?.message || t('加载投诉失败'));
   }
 }
 
 async function accept() {
   try {
     await reportApi.accept(detail.value.id, {});
-    toastOk('已受理，已通知被投诉人举证');
+    toastOk(t('已受理，已通知被投诉人举证'));
     await open(detail.value.id);
     await load();
   } catch (err) {
-    toastError(err?.message || '受理失败');
+    toastError(err?.message || t('受理失败'));
   }
 }
 
 async function decide() {
-  if (decideForm.note.length < 2) { toastError('请填写裁定说明'); return; }
+  if (decideForm.note.length < 2) { toastError(t('请填写裁定说明')); return; }
   try {
     await reportApi.decide(detail.value.id, {
       decision: decideForm.decision,
@@ -177,24 +174,24 @@ async function decide() {
       days: decideForm.days === '' ? undefined : Number(decideForm.days),
       note: decideForm.note,
     });
-    toastOk('已裁定并执行处罚');
+    toastOk(t('已裁定并执行处罚'));
     decideForm.note = '';
     await open(detail.value.id);
     await load();
   } catch (err) {
-    toastError(err?.message || '裁定失败');
+    toastError(err?.message || t('裁定失败'));
   }
 }
 
 async function reviewAppeal(appeal, approve) {
-  const note = window.prompt(approve ? '复审通过说明' : '驳回说明');
+  const note = window.prompt(approve ? t('复审通过说明') : t('驳回说明'));
   if (!note) return;
   try {
     await reportApi.reviewAppeal(appeal.id, { approve, note });
-    toastOk(approve ? '已撤销处罚并回滚信誉分' : '已驳回申诉');
+    toastOk(approve ? t('已撤销处罚并回滚信誉分') : t('已驳回申诉'));
     await load();
   } catch (err) {
-    toastError(err?.message || '复审失败');
+    toastError(err?.message || t('复审失败'));
   }
 }
 

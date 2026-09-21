@@ -2,6 +2,7 @@
 // 演示模式（VITE_DEMO=true）下不发真实请求，改为调用浏览器内的模拟后端（web/src/demo/server.js），
 // 路径、参数、错误码与真实后端完全一致，因此页面代码零改动。
 import axios from 'axios';
+import { t } from '../i18n/index.js';
 
 export const TOKEN_KEY = 'campus_book_token';
 export const REFRESH_KEY = 'campus_book_refresh';
@@ -12,7 +13,7 @@ export const IS_DEMO = String(import.meta.env.VITE_DEMO) === 'true';
 
 export class ApiError extends Error {
   constructor(code, message, details, requestId) {
-    super(message || '请求失败');
+    super(message || t('请求失败'));
     this.code = code;
     this.details = details;
     this.requestId = requestId;
@@ -58,7 +59,7 @@ const demoHttp = {
       return envelope.data;
     } catch (err) {
       if (err && typeof err.code === 'number') throw new ApiError(err.code, err.message, err.details, null);
-      throw new ApiError(50000, err?.message || '演示环境处理失败，请刷新重试');
+      throw new ApiError(50000, err?.message || t('演示环境处理失败，请刷新重试'));
     }
   },
   get(url, options) { return this.request('GET', url, null, options); },
@@ -90,7 +91,7 @@ http.interceptors.response.use(
   (error) => {
     const body = error.response?.data;
     if (body?.code) return Promise.reject(new ApiError(body.code, body.message, body.details, body.requestId));
-    const message = error.code === 'ECONNABORTED' ? '请求超时，请重试' : '网络异常，请检查后端服务是否启动';
+    const message = error.code === 'ECONNABORTED' ? t('请求超时，请重试') : t('网络异常，请检查后端服务是否启动');
     return Promise.reject(new ApiError(50000, message));
   },
 );

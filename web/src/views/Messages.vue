@@ -1,13 +1,13 @@
 <template>
   <div class="card">
     <div class="row-between">
-      <div class="bold">私信</div>
-      <span class="small muted">消息内容同样经过违禁词检测（L2 及以上会被拦截）</span>
+      <div class="bold">{{ $t('私信') }}</div>
+      <span class="small muted">{{ $t('消息内容同样经过违禁词检测（L2 及以上会被拦截）') }}</span>
     </div>
 
     <div class="msg-layout mt12">
       <div class="conv-list">
-        <div v-if="conversations.length === 0" class="small muted" style="padding:12px">还没有会话</div>
+        <div v-if="conversations.length === 0" class="small muted" style="padding:12px">{{ $t('还没有会话') }}</div>
         <button
           v-for="c in conversations" :key="c.id" class="conv-item" :class="{ active: c.id === currentId }"
           @click="openConversation(c.id)"
@@ -16,26 +16,26 @@
             <span class="bold">{{ c.peer_nickname }}</span>
             <span v-if="c.unread" class="tag tag-danger">{{ c.unread }}</span>
           </div>
-          <div class="small muted">{{ c.last_message_preview || '（暂无消息）' }}</div>
-          <div class="small muted">{{ c.book_id ? `关联图书 #${c.book_id}` : c.thread_id ? `关联帖子 #${c.thread_id}` : '普通会话' }}</div>
+          <div class="small muted">{{ c.last_message_preview || $t('（暂无消息）') }}</div>
+          <div class="small muted">{{ c.book_id ? `${$t('关联图书 #{0}', [c.book_id])}` : c.thread_id ? `${$t('关联帖子 #{0}', [c.thread_id])}` : $t('普通会话') }}</div>
         </button>
       </div>
 
       <div class="chat-panel">
         <div v-if="currentId" class="chat" ref="chatBox">
           <div v-for="m in messages" :key="m.id" class="bubble" :class="{ mine: m.sender_id === auth.user?.id }">
-            {{ m.content || '[图片]' }}
+            {{ m.content || $t('[图片]') }}
             <div v-if="m.image_url" class="mt8">
-              <img :src="imageUrl(m.image_url)" style="max-width:180px;border-radius:8px" alt="聊天图片" />
+              <img :src="imageUrl(m.image_url)" style="max-width:180px;border-radius:8px" :alt="$t('聊天图片')" />
             </div>
           </div>
         </div>
-        <EmptyState v-else text="选择左侧会话开始聊天" icon="✉️" />
+        <EmptyState v-else :text="$t('选择左侧会话开始聊天')" icon="✉️" />
 
         <div v-if="currentId" class="mt12">
           <div class="row">
-            <input v-model.trim="draft" placeholder="输入消息…" @keyup.enter="send" />
-            <button class="btn btn-primary" :disabled="sending" @click="send">发送</button>
+            <input v-model.trim="draft" :placeholder="$t('输入消息…')" @keyup.enter="send" />
+            <button class="btn btn-primary" :disabled="sending" @click="send">{{ $t('发送') }}</button>
           </div>
           <div class="mt8"><ImageUploader v-model="pendingImages" :max="1" :camera="false" /></div>
         </div>
@@ -45,6 +45,7 @@
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { nextTick, onMounted, onUnmounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { messageApi } from '../api/index.js';
@@ -95,7 +96,7 @@ async function send() {
     pendingImages.value = [];
     await openConversation(currentId.value);
   } catch (err) {
-    toastError(err?.message || '发送失败');
+    toastError(err?.message || t('发送失败'));
   } finally {
     sending.value = false;
   }

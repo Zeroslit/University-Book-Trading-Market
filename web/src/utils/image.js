@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.js';
 // 图片压缩：上传前把长边压到 <=1080px，输出 jpeg（后端只接收 jpg/png/webp）
 const MAX_EDGE = 1080;
 const DEFAULT_QUALITY = 0.82;
@@ -10,14 +11,14 @@ function loadImage(file) {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('图片解码失败')); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error(t('图片解码失败'))); };
     img.src = url;
   });
 }
 
 export async function compressImage(file, { maxEdge = MAX_EDGE, quality = DEFAULT_QUALITY } = {}) {
-  if (!file) throw new Error('请选择图片');
-  if (!String(file.type).startsWith('image/')) throw new Error('只支持图片文件');
+  if (!file) throw new Error(t('请选择图片'));
+  if (!String(file.type).startsWith('image/')) throw new Error(t('只支持图片文件'));
   // GIF 可能是动图，压缩会丢帧，直接原图上传
   if (file.type === 'image/gif') return file;
 

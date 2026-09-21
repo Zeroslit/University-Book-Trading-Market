@@ -4,20 +4,18 @@
       <div class="row-between wrap">
         <div>
           <h3 style="margin:0">{{ profile?.nickname || auth.user?.nickname }}</h3>
-          <div class="small muted">
-            学号 {{ profile?.studentNoMask }} · 手机 {{ profile?.phoneMask }} · 角色 {{ roleLabel }}
-          </div>
+          <div class="small muted">{{ $t('学号 {0} · 手机 {1} · 角色 {2}', [profile?.studentNoMask, profile?.phoneMask, roleLabel]) }}</div>
           <div class="chips mt8">
             <StatusTag :map="VERIFICATION_STATUS" :value="profile?.verification_status" />
-            <span class="chip">信誉分 {{ profile?.credit_score }}</span>
+            <span class="chip">{{ $t('信誉分 {0}', [profile?.credit_score]) }}</span>
             <span class="chip">{{ auth.schoolName }}</span>
           </div>
         </div>
         <div class="chips">
-          <RouterLink class="btn btn-sm" to="/verification">学生认证</RouterLink>
-          <RouterLink class="btn btn-sm" to="/payment-accounts">收款绑定</RouterLink>
-          <RouterLink class="btn btn-sm" to="/credit">信誉分</RouterLink>
-          <button class="btn btn-sm" @click="logout">退出登录</button>
+          <RouterLink class="btn btn-sm" to="/verification">{{ $t('学生认证') }}</RouterLink>
+          <RouterLink class="btn btn-sm" to="/payment-accounts">{{ $t('收款绑定') }}</RouterLink>
+          <RouterLink class="btn btn-sm" to="/credit">{{ $t('信誉分') }}</RouterLink>
+          <button class="btn btn-sm" @click="logout">{{ $t('退出登录') }}</button>
         </div>
       </div>
 
@@ -25,34 +23,35 @@
     </div>
 
     <div class="card">
-      <div class="bold">编辑资料</div>
-      <label>昵称</label>
+      <div class="bold">{{ $t('编辑资料') }}</div>
+      <label>{{ $t('昵称') }}</label>
       <input v-model.trim="form.nickname" maxlength="30" />
-      <label>头像</label>
+      <label>{{ $t('头像') }}</label>
       <ImageUploader v-model="avatarList" :max="1" :camera="false" />
-      <label>个人简介（会经过违禁词检测，L1 词会打码）</label>
+      <label>{{ $t('个人简介（会经过违禁词检测，L1 词会打码）') }}</label>
       <textarea v-model.trim="form.bio" maxlength="200" />
       <p v-if="error" class="notice notice-error mt12">{{ error }}</p>
-      <button class="btn btn-primary mt12" :disabled="saving" @click="save">保存</button>
+      <button class="btn btn-primary mt12" :disabled="saving" @click="save">{{ $t('保存') }}</button>
     </div>
 
     <div class="card">
-      <div class="bold">快捷入口</div>
+      <div class="bold">{{ $t('快捷入口') }}</div>
       <div class="chips mt8">
-        <RouterLink class="chip" to="/orders">我的订单</RouterLink>
-        <RouterLink class="chip" to="/wallet">我的钱包</RouterLink>
-        <RouterLink class="chip" to="/messages">私信</RouterLink>
-        <RouterLink class="chip" to="/notifications">消息通知</RouterLink>
-        <RouterLink class="chip" to="/reports">举报与投诉</RouterLink>
-        <RouterLink class="chip" to="/appeals">处罚申诉</RouterLink>
-        <RouterLink class="chip" to="/support">客服中心</RouterLink>
-        <RouterLink v-if="auth.isModerator" class="chip" to="/admin/dashboard">管理后台</RouterLink>
+        <RouterLink class="chip" to="/orders">{{ $t('我的订单') }}</RouterLink>
+        <RouterLink class="chip" to="/wallet">{{ $t('我的钱包') }}</RouterLink>
+        <RouterLink class="chip" to="/messages">{{ $t('私信') }}</RouterLink>
+        <RouterLink class="chip" to="/notifications">{{ $t('消息通知') }}</RouterLink>
+        <RouterLink class="chip" to="/reports">{{ $t('举报与投诉') }}</RouterLink>
+        <RouterLink class="chip" to="/appeals">{{ $t('处罚申诉') }}</RouterLink>
+        <RouterLink class="chip" to="/support">{{ $t('客服中心') }}</RouterLink>
+        <RouterLink v-if="auth.isModerator" class="chip" to="/admin/dashboard">{{ $t('管理后台') }}</RouterLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { userApi } from '../api/index.js';
@@ -70,19 +69,19 @@ const saving = ref(false);
 const error = ref('');
 const form = reactive({ nickname: '', bio: '' });
 
-const ROLE_LABEL = { student: '学生', school_admin: '学校管理员', support: '人工客服', platform_admin: '平台管理员' };
+const ROLE_LABEL = { get student() { return t('学生') }, get school_admin() { return t('学校管理员') }, get support() { return t('人工客服') }, get platform_admin() { return t('平台管理员') } };
 const roleLabel = computed(() => ROLE_LABEL[profile.value?.role] || profile.value?.role);
 
 const banNotice = computed(() => {
   const user = profile.value;
   if (!user) return '';
   const parts = [];
-  if (user.banned_permanently) parts.push('账号已被永久封禁');
-  if (user.mute_until) parts.push(`禁言至 ${new Date(user.mute_until).toLocaleString('zh-CN')}`);
-  if (user.trade_ban_until) parts.push(`限制交易至 ${new Date(user.trade_ban_until).toLocaleString('zh-CN')}`);
-  if (user.login_ban_until) parts.push(`禁止登录至 ${new Date(user.login_ban_until).toLocaleString('zh-CN')}`);
+  if (user.banned_permanently) parts.push(t('账号已被永久封禁'));
+  if (user.mute_until) parts.push(`${t('禁言至 {0}', [new Date(user.mute_until).toLocaleString('zh-CN')])}`);
+  if (user.trade_ban_until) parts.push(`${t('限制交易至 {0}', [new Date(user.trade_ban_until).toLocaleString('zh-CN')])}`);
+  if (user.login_ban_until) parts.push(`${t('禁止登录至 {0}', [new Date(user.login_ban_until).toLocaleString('zh-CN')])}`);
   if (parts.length === 0) return '';
-  return `${parts.join('；')}。封禁期间进行中的订单仍可正常完成或退款。可在「处罚申诉」提交申诉。`;
+  return `${t('{0}。封禁期间进行中的订单仍可正常完成或退款。可在「处罚申诉」提交申诉。', [parts.join('；')])}`;
 });
 
 async function load() {
@@ -101,11 +100,11 @@ async function save() {
       avatarUrl: avatarList.value[0] || undefined,
       bio: form.bio,
     });
-    toastOk('资料已更新');
+    toastOk(t('资料已更新'));
     await auth.load(true);
     await load();
   } catch (err) {
-    error.value = err?.message || '保存失败';
+    error.value = err?.message || t('保存失败');
   } finally {
     saving.value = false;
   }

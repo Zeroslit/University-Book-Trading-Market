@@ -2,26 +2,25 @@
   <div>
     <div class="chips">
       <div v-for="(url, index) in modelValue" :key="url + index" class="upload-item">
-        <img :src="imageUrl(url)" alt="已上传图片" />
+        <img :src="imageUrl(url)" :alt="$t('已上传图片')" />
         <button type="button" class="upload-remove" @click="remove(index)">×</button>
       </div>
       <label v-if="modelValue.length < max" class="upload-add">
         <input type="file" accept="image/*" multiple hidden @change="onPick($event)" />
-        <span>＋<br /><span class="small">相册</span></span>
+        <span>＋<br /><span class="small">{{ $t('相册') }}</span></span>
       </label>
       <label v-if="modelValue.length < max && camera" class="upload-add">
         <input type="file" accept="image/*" capture="environment" hidden @change="onPick($event)" />
-        <span>📷<br /><span class="small">拍照</span></span>
+        <span>📷<br /><span class="small">{{ $t('拍照') }}</span></span>
       </label>
     </div>
-    <p class="small muted" style="margin:6px 0 0">
-      最多 {{ max }} 张，前端自动压缩到长边 ≤ 1080px 后上传（{{ modelValue.length }}/{{ max }}）
-    </p>
-    <p v-if="uploading" class="small">图片上传中…</p>
+    <p class="small muted" style="margin:6px 0 0">{{ $t('最多 {0} 张，前端自动压缩到长边 ≤ 1080px 后上传（{1}/{2}）', [max, modelValue.length, max]) }}</p>
+    <p v-if="uploading" class="small">{{ $t('图片上传中…') }}</p>
   </div>
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { ref } from 'vue';
 import { compressImage, imageUrl } from '../utils/image.js';
 import { uploadApi } from '../api/index.js';
@@ -50,7 +49,7 @@ async function onPick(event) {
     }
     emit('update:modelValue', next);
   } catch (err) {
-    toastError(err?.message || '图片上传失败');
+    toastError(err?.message || t('图片上传失败'));
   } finally {
     uploading.value = false;
   }

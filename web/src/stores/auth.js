@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia';
 import { authApi, walletApi } from '../api/index.js';
 import { setTokens, clearTokens, hasToken } from '../api/client.js';
+import { t } from '../i18n/index.js';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -21,7 +22,7 @@ export const useAuthStore = defineStore('auth', {
     // 客服 / 平台管理员跨校：需要显式选择学校
     needSchoolPicker: (s) => ['support', 'platform_admin'].includes(s.role),
     verified: (s) => s.user?.verificationStatus === 'approved',
-    schoolName: (s) => s.school?.name || '平台',
+    schoolName: (s) => s.school?.name || t('平台'),
   },
   actions: {
     async load(force = false) {

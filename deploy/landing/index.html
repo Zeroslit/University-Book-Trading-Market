@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+    <title>校园教材循环 · 高校教材交易平台（在线演示） / Campus Textbook Circle</title>
+    <style>
+      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+             background: #f6f8fa; color: #1b1f24; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+      .card { background: #fff; border: 1px solid #d0d7de; border-radius: 12px; padding: 28px; max-width: 720px; width: 100%; box-shadow: 0 6px 24px rgba(27,31,36,.08); }
+      h1 { margin: 0 0 6px; font-size: 22px; }
+      p { line-height: 1.7; margin: 8px 0; }
+      .muted { color: #59636e; font-size: 13px; }
+      a.btn { display: inline-block; margin-top: 12px; background: #1f6feb; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; }
+      code { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+      .notice { margin-top: 16px; background: #fff8e6; border: 1px solid #f0d9a0; color: #7a5b13; border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.6; }
+      .lang { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-bottom: 12px; }
+      .lang button { font: inherit; font-size: 13px; padding: 4px 12px; border-radius: 999px; border: 1px solid #d0d7de;
+                     background: #fff; color: #1b1f24; cursor: pointer; }
+      .lang button[aria-pressed="true"] { background: #1f6feb; border-color: #1f6feb; color: #fff; font-weight: 600; }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="lang">
+        <button id="btn-zh" type="button" aria-pressed="true" onclick="setLang('zh')">简体中文</button>
+        <button id="btn-en" type="button" aria-pressed="false" onclick="setLang('en')">English</button>
+      </div>
+
+      <section id="zh">
+        <h1>📚 校园教材循环 · 高校教材交易平台</h1>
+        <p class="muted">多校隔离 · 资金托管 · 风控与客服体系 —— 在线交互演示</p>
+        <p>这是平台前端的<strong>纯静态演示版</strong>：界面、流程与真实部署完全一致，数据来自种子数据快照，
+          所有登录 / 下单 / 支付 / 放款 / 处罚 / 工单操作都在你的浏览器内存中模拟，不会写入任何真实数据库。</p>
+        <p><a class="btn" href="./web/">进入在线演示 →</a></p>
+        <p class="muted">进入后点「演示环境 · 一键切换角色」即可用学生 / 校管 / 客服 / 平台管理员身份体验完整流程。</p>
+        <div class="notice">
+          演示环境说明：短信验证码固定为 <code>123456</code>，种子账号统一密码 <code>Test@123456</code>；
+          支付、微信授权、银行卡鉴权均为模拟实现，请勿填写真实银行卡号、CVV 或支付密码。
+          数据保存在浏览器 localStorage，可随时点顶部「重置演示数据」恢复初始状态。
+        </div>
+        <p class="muted" style="margin-top:16px">需要真实后端（Node 20 + MySQL 8 + Redis）时，请查看仓库 README 与 <code>docker-compose.yml</code>，
+          用 <code>docker compose up -d</code> 一键启动完整服务。</p>
+      </section>
+
+      <section id="en" hidden lang="en">
+        <h1>📚 Campus Textbook Circle · University Textbook Recommerce Platform</h1>
+        <p class="muted">Per-school isolation · Escrow payments · Risk control and customer support — an interactive online demo</p>
+        <p>This is the <strong>pure static demo</strong> of the front end: the UI and flows match a real deployment exactly, and the data comes from a seed snapshot.
+          Every login / order / payment / payout / penalty / ticket action is simulated in your browser memory and never written to a real database.</p>
+        <p><a class="btn" href="./web/">Enter the live demo →</a></p>
+        <p class="muted">Once inside, use "Demo · one-click role switch" to walk through the full flow as a student, school admin, support agent or platform admin.</p>
+        <div class="notice">
+          Demo notes: the SMS verification code is fixed to <code>123456</code> and all seed accounts share the password <code>Test@123456</code>.
+          Payments, WeChat authorization and bank-card authentication are simulated — never enter real card numbers, CVV codes or payment passwords.
+          Data lives in browser localStorage; click "Reset demo data" at the top at any time to restore the initial state.
+        </div>
+        <p class="muted" style="margin-top:16px">For the real backend (Node 20 + MySQL 8 + Redis), see the repository README and <code>docker-compose.yml</code>,
+          then run <code>docker compose up -d</code> to start the full stack.</p>
+      </section>
+    </div>
+
+    <script>
+      // 语言切换：默认简体中文，选择结果写入 localStorage，下次打开保持
+      function setLang(lang) {
+        var zh = document.getElementById('zh');
+        var en = document.getElementById('en');
+        var isZh = lang !== 'en';
+        zh.hidden = !isZh;
+        en.hidden = isZh;
+        document.documentElement.lang = isZh ? 'zh-CN' : 'en';
+        document.getElementById('btn-zh').setAttribute('aria-pressed', String(isZh));
+        document.getElementById('btn-en').setAttribute('aria-pressed', String(!isZh));
+        try { localStorage.setItem('landing.lang', isZh ? 'zh' : 'en'); } catch (e) {}
+      }
+      try {
+        if (localStorage.getItem('landing.lang') === 'en') setLang('en');
+      } catch (e) {}
+    </script>
+  </body>
+</html>

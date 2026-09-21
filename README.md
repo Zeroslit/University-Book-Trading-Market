@@ -1,3 +1,5 @@
+**简体中文** | [English](./README.en.md)
+
 # 校园教材循环 · 全国高校教材循环交易平台
 
 面向全国高校的大学生教材循环交易平台，包含**多校隔离、图书库、论坛、私信、交易资金托管、钱包、通知、信誉分与违规处罚、四级违禁词风控、AI+人工客服工单、管理后台**等完整能力。
@@ -111,6 +113,23 @@ node scripts/build-demo-dataset.mjs   # 需先执行 cd server && npm run db:res
 ```
 
 发布方式：把 `web/dist` 的内容放到 `gh-pages` 分支的 `web/` 目录，并在分支根目录放置 `.nojekyll`（否则以 `_` 开头的文件名会被 Jekyll 忽略）；仓库 Pages 发布源指向 `gh-pages` 分支根目录。分支根目录的 `404.html` 是 SPA 兜底页，用于让 `/web/login` 这类深链接可直接打开。
+
+
+#### 国内镜像站部署（Cloudflare Pages / Netlify）
+
+GitHub Pages（`*.github.io`）在国内访问时通时不通，属网络可达性问题，与代码无关。仓库内置一套「同代码、零改动」镜像方案：
+
+```powershell
+# 1) 构建镜像产物（base=/web/，落到 deploy/dist）
+.\deploy\build-mirror.ps1
+
+# 2) 网页方式：把 deploy/dist 整个文件夹拖到 Cloudflare Pages 的 Upload assets
+#    或命令行方式（需 Cloudflare API Token，见 deploy/README-mirror-deploy.md）
+.\deploy\deploy-cloudflare.ps1
+```
+
+得到形如 `https://campus-book-demo.pages.dev/`（落地页）与 `https://campus-book-demo.pages.dev/web/`（演示应用）的地址，
+国内可达性明显好于 `github.io`。完整步骤、Netlify / 腾讯云 EdgeOne 备选方案与常见问题见 [`deploy/README-mirror-deploy.md`](deploy/README-mirror-deploy.md)。
 
 ### 种子数据与演示账号
 

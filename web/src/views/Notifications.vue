@@ -2,12 +2,12 @@
   <div>
     <div class="card">
       <div class="row-between wrap">
-        <div class="bold">消息通知（未读 {{ unread }}）</div>
+        <div class="bold">{{ $t('消息通知（未读 {0}）', [unread]) }}</div>
         <div class="chips">
-          <button class="chip" :class="{ active: isRead === '' }" @click="setFilter('')">全部</button>
-          <button class="chip" :class="{ active: isRead === 'false' }" @click="setFilter('false')">未读</button>
-          <button class="chip" :class="{ active: isRead === 'true' }" @click="setFilter('true')">已读</button>
-          <button class="btn btn-sm" @click="markAll">全部已读</button>
+          <button class="chip" :class="{ active: isRead === '' }" @click="setFilter('')">{{ $t('全部') }}</button>
+          <button class="chip" :class="{ active: isRead === 'false' }" @click="setFilter('false')">{{ $t('未读') }}</button>
+          <button class="chip" :class="{ active: isRead === 'true' }" @click="setFilter('true')">{{ $t('已读') }}</button>
+          <button class="btn btn-sm" @click="markAll">{{ $t('全部已读') }}</button>
         </div>
       </div>
     </div>
@@ -23,13 +23,13 @@
         </div>
         <div class="mt8" style="white-space:pre-wrap">{{ n.content }}</div>
         <div class="row mt8">
-          <RouterLink v-if="n.related_type === 'order'" class="btn btn-sm" :to="`/orders/${n.related_id}`">查看订单</RouterLink>
-          <RouterLink v-if="n.related_type === 'penalty'" class="btn btn-sm" to="/appeals">查看处罚 / 申诉</RouterLink>
-          <button v-if="!n.is_read" class="btn btn-sm" @click="markRead(n.id)">标记已读</button>
+          <RouterLink v-if="n.related_type === 'order'" class="btn btn-sm" :to="`/orders/${n.related_id}`">{{ $t('查看订单') }}</RouterLink>
+          <RouterLink v-if="n.related_type === 'penalty'" class="btn btn-sm" to="/appeals">{{ $t('查看处罚 / 申诉') }}</RouterLink>
+          <button v-if="!n.is_read" class="btn btn-sm" @click="markRead(n.id)">{{ $t('标记已读') }}</button>
         </div>
       </div>
     </div>
-    <EmptyState v-else text="暂无通知" icon="🔔" />
+    <EmptyState v-else :text="$t('暂无通知')" icon="🔔" />
 
     <Pager :page="page" :page-size="pageSize" :total="total" :has-more="hasMore" @change="load" />
   </div>

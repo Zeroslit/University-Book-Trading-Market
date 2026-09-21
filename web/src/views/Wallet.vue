@@ -3,53 +3,50 @@
     <div class="card">
       <div class="row-between wrap">
         <div>
-          <div class="small muted">可用余额</div>
+          <div class="small muted">{{ $t('可用余额') }}</div>
           <div class="price" style="font-size:26px">¥{{ yuan(account?.balanceCents) }}</div>
-          <div class="small muted">
-            冻结金额 ¥{{ yuan(account?.frozenCents) }} · 信誉档位 {{ account?.creditTier }} ·
-            提现{{ account?.withdrawInstant ? '即时到账' : `延迟 ${account?.withdrawDelayHours} 小时` }}
-          </div>
+          <div class="small muted">{{ $t('冻结金额 ¥{0} · 信誉档位 {1} · 提现{2}', [yuan(account?.frozenCents), account?.creditTier, account?.withdrawInstant ? $t('即时到账') : `${$t('延迟 {0} 小时', [account?.withdrawDelayHours])}`]) }}</div>
         </div>
         <div class="chips">
-          <button class="btn btn-sm" @click="showRecharge = !showRecharge">模拟充值</button>
-          <button class="btn btn-sm btn-primary" @click="showWithdraw = !showWithdraw">提现</button>
-          <RouterLink class="btn btn-sm" to="/payment-accounts">收款绑定</RouterLink>
+          <button class="btn btn-sm" @click="showRecharge = !showRecharge">{{ $t('模拟充值') }}</button>
+          <button class="btn btn-sm btn-primary" @click="showWithdraw = !showWithdraw">{{ $t('提现') }}</button>
+          <RouterLink class="btn btn-sm" to="/payment-accounts">{{ $t('收款绑定') }}</RouterLink>
         </div>
       </div>
 
       <div v-if="showRecharge" class="card mt12">
-        <div class="bold">模拟充值（一期不接入真实支付）</div>
-        <label>金额（元）</label>
+        <div class="bold">{{ $t('模拟充值（一期不接入真实支付）') }}</div>
+        <label>{{ $t('金额（元）') }}</label>
         <input v-model.trim="rechargeAmount" type="number" min="1" max="5000" step="0.01" />
-        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="recharge">确认充值</button>
+        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="recharge">{{ $t('确认充值') }}</button>
       </div>
 
       <div v-if="showWithdraw" class="card mt12">
-        <div class="bold">提现（必须已绑定收款方式且通过学生认证）</div>
-        <label>金额（元）</label>
+        <div class="bold">{{ $t('提现（必须已绑定收款方式且通过学生认证）') }}</div>
+        <label>{{ $t('金额（元）') }}</label>
         <input v-model.trim="withdrawAmount" type="number" min="1" step="0.01" />
-        <label>收款方式</label>
+        <label>{{ $t('收款方式') }}</label>
         <select v-model="withdrawAccountId">
-          <option value="">请选择已绑定的收款方式</option>
+          <option value="">{{ $t('请选择已绑定的收款方式') }}</option>
           <option v-for="a in paymentAccounts" :key="a.id" :value="a.id">
-            {{ a.typeLabel }} {{ a.accountMask }}{{ a.isDefault ? '（默认）' : '' }}
+            {{ a.typeLabel }} {{ a.accountMask }}{{ a.isDefault ? $t('（默认）') : '' }}
           </option>
         </select>
-        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="withdraw">提交提现</button>
-        <p class="small muted mt8">资金流向会写入流水表，可按订单号追溯。</p>
+        <button class="btn btn-primary btn-sm mt12" :disabled="busy" @click="withdraw">{{ $t('提交提现') }}</button>
+        <p class="small muted mt8">{{ $t('资金流向会写入流水表，可按订单号追溯。') }}</p>
       </div>
     </div>
 
     <div class="card">
-      <div class="bold">提现记录</div>
+      <div class="bold">{{ $t('提现记录') }}</div>
       <table class="table mt8">
-        <thead><tr><th>提现单号</th><th>金额</th><th>状态</th><th>到账方式</th><th>预计到账</th><th>申请时间</th></tr></thead>
+        <thead><tr><th>{{ $t('提现单号') }}</th><th>{{ $t('金额') }}</th><th>{{ $t('状态') }}</th><th>{{ $t('到账方式') }}</th><th>{{ $t('预计到账') }}</th><th>{{ $t('申请时间') }}</th></tr></thead>
         <tbody>
           <tr v-for="w in withdrawals" :key="w.id">
             <td class="small">{{ w.withdraw_no }}</td>
             <td>¥{{ yuan(w.amount_cents) }}</td>
             <td>{{ w.status }}</td>
-            <td>{{ w.arrival_type === 'instant' ? '即时' : '延迟' }}</td>
+            <td>{{ w.arrival_type === 'instant' ? $t('即时') : $t('延迟') }}</td>
             <td class="small">{{ formatTime(w.expect_at) }}</td>
             <td class="small">{{ formatTime(w.created_at) }}</td>
           </tr>
@@ -59,24 +56,24 @@
 
     <div class="card">
       <div class="row-between">
-        <div class="bold">资金明细（全部留痕）</div>
+        <div class="bold">{{ $t('资金明细（全部留痕）') }}</div>
         <select v-model="bizType" style="width:auto" @change="loadTransactions(1)">
-          <option value="">全部业务类型</option>
-          <option value="recharge">充值</option>
-          <option value="order_hold">下单托管</option>
-          <option value="order_release">放款</option>
-          <option value="refund">退款</option>
-          <option value="fee">服务费</option>
-          <option value="withdraw">提现</option>
+          <option value="">{{ $t('全部业务类型') }}</option>
+          <option value="recharge">{{ $t('充值') }}</option>
+          <option value="order_hold">{{ $t('下单托管') }}</option>
+          <option value="order_release">{{ $t('放款') }}</option>
+          <option value="refund">{{ $t('退款') }}</option>
+          <option value="fee">{{ $t('服务费') }}</option>
+          <option value="withdraw">{{ $t('提现') }}</option>
         </select>
       </div>
       <table class="table mt8">
-        <thead><tr><th>流水号</th><th>账户</th><th>方向</th><th>金额</th><th>业务</th><th>余额</th><th>时间</th></tr></thead>
+        <thead><tr><th>{{ $t('流水号') }}</th><th>{{ $t('账户') }}</th><th>{{ $t('方向') }}</th><th>{{ $t('金额') }}</th><th>{{ $t('业务') }}</th><th>{{ $t('余额') }}</th><th>{{ $t('时间') }}</th></tr></thead>
         <tbody>
           <tr v-for="t in transactions" :key="t.id">
             <td class="small">{{ t.tx_no }}</td>
             <td>{{ t.account }}</td>
-            <td>{{ t.direction === 'in' ? '入账' : '出账' }}</td>
+            <td>{{ t.direction === 'in' ? $t('入账') : $t('出账') }}</td>
             <td>¥{{ yuan(t.amount_cents) }}</td>
             <td>{{ t.biz_type }}</td>
             <td>{{ yuan(t.balance_after_cents) }}</td>
@@ -90,6 +87,7 @@
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { onMounted, ref } from 'vue';
 import { walletApi, paymentAccountApi } from '../api/index.js';
 import { centsToYuan, formatTime, yuanToCents } from '../utils/format.js';
@@ -132,16 +130,16 @@ async function loadTransactions(nextPage = page.value) {
 
 async function recharge() {
   const amountCents = yuanToCents(rechargeAmount.value);
-  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError('充值金额至少 1 元'); return; }
+  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError(t('充值金额至少 1 元')); return; }
   busy.value = true;
   try {
     await walletApi.recharge({ amountCents });
-    toastOk('充值成功（模拟）');
+    toastOk(t('充值成功（模拟）'));
     showRecharge.value = false;
     await loadAll();
     await auth.refreshWallet();
   } catch (err) {
-    toastError(err?.message || '充值失败');
+    toastError(err?.message || t('充值失败'));
   } finally {
     busy.value = false;
   }
@@ -149,17 +147,17 @@ async function recharge() {
 
 async function withdraw() {
   const amountCents = yuanToCents(withdrawAmount.value);
-  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError('提现金额至少 1 元'); return; }
-  if (!withdrawAccountId.value) { toastError('请选择收款方式'); return; }
+  if (!Number.isFinite(amountCents) || amountCents < 100) { toastError(t('提现金额至少 1 元')); return; }
+  if (!withdrawAccountId.value) { toastError(t('请选择收款方式')); return; }
   busy.value = true;
   try {
     const data = await walletApi.withdraw({ amountCents, paymentAccountId: Number(withdrawAccountId.value) });
-    toastOk(data.arrivalType === 'instant' ? '提现申请已提交，预计即时到账' : '提现申请已提交，将延迟到账');
+    toastOk(data.arrivalType === 'instant' ? t('提现申请已提交，预计即时到账') : t('提现申请已提交，将延迟到账'));
     showWithdraw.value = false;
     await loadAll();
     await auth.refreshWallet();
   } catch (err) {
-    toastError(err?.message || '提现失败');
+    toastError(err?.message || t('提现失败'));
   } finally {
     busy.value = false;
   }

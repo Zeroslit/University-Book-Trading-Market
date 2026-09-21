@@ -7,8 +7,9 @@
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 defineProps({
-  text: { type: String, default: '暂无数据' },
+  text: { type: String, default: t('暂无数据') },
   icon: { type: String, default: '📭' },
 });
 </script>

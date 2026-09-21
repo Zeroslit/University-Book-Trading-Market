@@ -5,9 +5,9 @@
         <div>
           <h2 style="margin:0">{{ book.title }}</h2>
           <div class="small muted">
-            {{ book.author || '未填作者' }} · {{ book.publisher || '未填出版社' }}
+            {{ book.author || $t('未填作者') }} · {{ book.publisher || $t('未填出版社') }}
             <span v-if="book.isbn"> · ISBN {{ book.isbn }}</span>
-            <span v-if="book.course_name"> · 课程 {{ book.course_name }}</span>
+            <span v-if="book.course_name"> {{ $t('· 课程 {0}', [book.course_name]) }}</span>
           </div>
         </div>
         <StatusTag :map="BOOK_STATUS" :value="book.status" />
@@ -17,7 +17,7 @@
         <div style="flex:1 1 320px">
           <div v-if="book.images?.length" class="row" style="gap:8px;flex-wrap:wrap">
             <img
-              v-for="(img, i) in book.images" :key="i" :src="imageUrl(img.url)" :alt="`实拍图 ${i + 1}`"
+              v-for="(img, i) in book.images" :key="i" :src="imageUrl(img.url)" :alt="`${$t('实拍图 {0}', [i + 1])}`"
               style="width:150px;height:150px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"
             />
           </div>
@@ -25,60 +25,58 @@
         </div>
         <div style="flex:1 1 260px">
           <div class="price" style="font-size:24px">¥{{ yuan(book.price_cents) }}</div>
-          <div class="small muted">原价 ¥{{ yuan(book.original_price_cents) }} · 成色 {{ CONDITION_LABELS[book.condition_level] }}</div>
+          <div class="small muted">{{ $t('原价 ¥{0} · 成色 {1}', [yuan(book.original_price_cents), CONDITION_LABELS[book.condition_level]]) }}</div>
           <div class="mt8">
-            <span class="tag">卖家 {{ book.seller_nickname }}</span>
-            <span class="tag tag-info">信誉 {{ book.seller.creditScore }}（{{ book.seller.creditTier.label }}）</span>
-            <span class="tag tag-success">历史成交 {{ book.seller.soldCount }} 单</span>
-            <span v-if="book.seller.verified" class="tag tag-success">已认证学生</span>
+            <span class="tag">{{ $t('卖家 {0}', [book.seller_nickname]) }}</span>
+            <span class="tag tag-info">{{ $t('信誉 {0}（{1}）', [book.seller.creditScore, book.seller.creditTier.label]) }}</span>
+            <span class="tag tag-success">{{ $t('历史成交 {0} 单', [book.seller.soldCount]) }}</span>
+            <span v-if="book.seller.verified" class="tag tag-success">{{ $t('已认证学生') }}</span>
           </div>
           <div v-if="book.remark" class="notice mt12 small">{{ book.remark }}</div>
 
           <div v-if="book.isMine" class="notice notice-info mt12">
-            这是你发布的教材。
-            <RouterLink to="/orders?role=seller">查看作为卖家的订单 →</RouterLink>
+            {{ $t('这是你发布的教材。') }}
+            <RouterLink to="/orders?role=seller">{{ $t('查看作为卖家的订单 →') }}</RouterLink>
           </div>
           <div v-else-if="book.activeOrder" class="notice notice-info mt12">
-            该教材已有进行中的订单（<StatusTag :map="ORDER_STATUS" :value="book.activeOrder.status" />），暂时无法下单。
+            {{ $t('该教材已有进行中的订单（') }}<StatusTag :map="ORDER_STATUS" :value="book.activeOrder.status" />{{ $t('），暂时无法下单。') }}
           </div>
 
           <div class="row mt12" style="flex-wrap:wrap">
             <button v-if="book.canOrder" class="btn btn-primary" :disabled="ordering" @click="buy">
-              {{ ordering ? '处理中…' : '立即购买（资金托管）' }}
+              {{ ordering ? $t('处理中…') : $t('立即购买（资金托管）') }}
             </button>
-            <button class="btn" @click="contact">联系卖家</button>
-            <button class="btn btn-sm" @click="showReport = !showReport">举报</button>
+            <button class="btn" @click="contact">{{ $t('联系卖家') }}</button>
+            <button class="btn btn-sm" @click="showReport = !showReport">{{ $t('举报') }}</button>
           </div>
-          <p class="small muted mt8">下单后货款由平台托管，你确认收货前不会放款给卖家。</p>
+          <p class="small muted mt8">{{ $t('下单后货款由平台托管，你确认收货前不会放款给卖家。') }}</p>
         </div>
       </div>
     </div>
 
     <div v-if="showReport" class="card">
-      <div class="bold">举报该教材</div>
-      <label>举报原因</label>
-      <input v-model.trim="reportForm.reason" maxlength="60" placeholder="如：描述不符 / 盗版 / 引流广告" />
-      <label>补充说明</label>
+      <div class="bold">{{ $t('举报该教材') }}</div>
+      <label>{{ $t('举报原因') }}</label>
+      <input v-model.trim="reportForm.reason" maxlength="60" :placeholder="$t('如：描述不符 / 盗版 / 引流广告')" />
+      <label>{{ $t('补充说明') }}</label>
       <textarea v-model.trim="reportForm.description" maxlength="1000" />
-      <button class="btn btn-danger btn-sm mt12" @click="submitReport">提交举报</button>
+      <button class="btn btn-danger btn-sm mt12" @click="submitReport">{{ $t('提交举报') }}</button>
     </div>
 
     <div v-if="payOrder" class="card">
-      <div class="bold">订单已创建，请在 30 分钟内完成支付（模拟）</div>
-      <p class="small muted">
-        订单号 {{ payOrder.orderNo }} · 金额 ¥{{ yuan(payOrder.amountCents) }} ·
-        平台服务费 ¥{{ yuan(payOrder.serviceFeeCents) }}
-      </p>
+      <div class="bold">{{ $t('订单已创建，请在 30 分钟内完成支付（模拟）') }}</div>
+      <p class="small muted">{{ $t('订单号 {0} · 金额 ¥{1} · 平台服务费 ¥{2}', [payOrder.orderNo, yuan(payOrder.amountCents), yuan(payOrder.serviceFeeCents)]) }}</p>
       <div class="row">
-        <button class="btn btn-primary btn-sm" :disabled="paying" @click="pay">确认支付（模拟托管）</button>
-        <button class="btn btn-sm" @click="goOrder">查看订单</button>
+        <button class="btn btn-primary btn-sm" :disabled="paying" @click="pay">{{ $t('确认支付（模拟托管）') }}</button>
+        <button class="btn btn-sm" @click="goOrder">{{ $t('查看订单') }}</button>
       </div>
     </div>
   </div>
-  <EmptyState v-else text="教材不存在或不属于本校" icon="🔍" />
+  <EmptyState v-else :text="$t('教材不存在或不属于本校')" icon="🔍" />
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { bookApi, orderApi, messageApi, reportApi } from '../api/index.js';
@@ -109,10 +107,10 @@ async function load() {
 async function contact() {
   try {
     const data = await messageApi.open({ bookId: book.value.id });
-    toastOk(data.reused ? '已打开既有会话' : '会话已创建');
+    toastOk(data.reused ? t('已打开既有会话') : t('会话已创建'));
     router.push({ path: '/messages', query: { conversationId: data.conversationId } });
   } catch (err) {
-    toastError(err?.message || '发起会话失败');
+    toastError(err?.message || t('发起会话失败'));
   }
 }
 
@@ -120,10 +118,10 @@ async function buy() {
   ordering.value = true;
   try {
     payOrder.value = await orderApi.create({ bookId: book.value.id, shipMode: 'meetup' });
-    toastOk('下单成功，请完成支付（模拟）');
+    toastOk(t('下单成功，请完成支付（模拟）'));
     await load();
   } catch (err) {
-    toastError(err?.message || '下单失败');
+    toastError(err?.message || t('下单失败'));
   } finally {
     ordering.value = false;
   }
@@ -133,10 +131,10 @@ async function pay() {
   paying.value = true;
   try {
     await orderApi.pay(payOrder.value.id);
-    toastOk('支付成功（模拟），资金已进入托管');
+    toastOk(t('支付成功（模拟），资金已进入托管'));
     router.push(`/orders/${payOrder.value.id}`);
   } catch (err) {
-    toastError(err?.message || '支付失败');
+    toastError(err?.message || t('支付失败'));
   } finally {
     paying.value = false;
   }
@@ -147,17 +145,17 @@ function goOrder() {
 }
 
 async function submitReport() {
-  if (reportForm.reason.length < 2) { toastError('请填写举报原因'); return; }
+  if (reportForm.reason.length < 2) { toastError(t('请填写举报原因')); return; }
   try {
     await reportApi.create({
       targetType: 'book', targetId: Number(route.params.id),
       reason: reportForm.reason, description: reportForm.description || undefined,
     });
-    toastOk('举报已提交，可在「举报与投诉」查看进展');
+    toastOk(t('举报已提交，可在「举报与投诉」查看进展'));
     showReport.value = false;
     reportForm.reason = ''; reportForm.description = '';
   } catch (err) {
-    toastError(err?.message || '举报提交失败');
+    toastError(err?.message || t('举报提交失败'));
   }
 }
 

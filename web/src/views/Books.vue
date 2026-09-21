@@ -3,54 +3,52 @@
     <div class="card">
       <div class="row-between wrap">
         <div>
-          <div class="bold">本校教材图书库</div>
-          <div class="small muted">仅在 {{ auth.schoolName }} 范围内检索（服务端强制注入 school_id）</div>
+          <div class="bold">{{ $t('本校教材图书库') }}</div>
+          <div class="small muted">{{ $t('仅在 {0} 范围内检索（服务端强制注入 school_id）', [auth.schoolName]) }}</div>
         </div>
-        <RouterLink class="btn btn-primary btn-sm" to="/books/new">＋ 发布教材</RouterLink>
+        <RouterLink class="btn btn-primary btn-sm" to="/books/new">{{ $t('＋ 发布教材') }}</RouterLink>
       </div>
 
       <div class="grid mt12" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
         <div>
-          <label>关键词</label>
-          <input v-model.trim="filters.keyword" placeholder="书名 / 作者 / ISBN / 课程" @keyup.enter="reload(1)" />
+          <label>{{ $t('关键词') }}</label>
+          <input v-model.trim="filters.keyword" :placeholder="$t('书名 / 作者 / ISBN / 课程')" @keyup.enter="reload(1)" />
         </div>
         <div>
-          <label>课程名</label>
-          <input v-model.trim="filters.course" placeholder="如 高等数学" @keyup.enter="reload(1)" />
+          <label>{{ $t('课程名') }}</label>
+          <input v-model.trim="filters.course" :placeholder="$t('如 高等数学')" @keyup.enter="reload(1)" />
         </div>
         <div>
-          <label>成色</label>
+          <label>{{ $t('成色') }}</label>
           <select v-model="filters.condition" @change="reload(1)">
-            <option value="">全部</option>
+            <option value="">{{ $t('全部') }}</option>
             <option v-for="(label, key) in CONDITION_LABELS" :key="key" :value="key">{{ label }}</option>
           </select>
         </div>
         <div>
-          <label>最低价（元）</label>
+          <label>{{ $t('最低价（元）') }}</label>
           <input v-model.trim="filters.minPrice" type="number" min="0" @keyup.enter="reload(1)" />
         </div>
         <div>
-          <label>最高价（元）</label>
+          <label>{{ $t('最高价（元）') }}</label>
           <input v-model.trim="filters.maxPrice" type="number" min="0" @keyup.enter="reload(1)" />
         </div>
         <div>
-          <label>排序</label>
+          <label>{{ $t('排序') }}</label>
           <select v-model="filters.sort" @change="reload(1)">
-            <option value="-createdAt">最新发布</option>
-            <option value="price">价格从低到高</option>
-            <option value="-price">价格从高到低</option>
-            <option value="-views">最多浏览</option>
+            <option value="-createdAt">{{ $t('最新发布') }}</option>
+            <option value="price">{{ $t('价格从低到高') }}</option>
+            <option value="-price">{{ $t('价格从高到低') }}</option>
+            <option value="-views">{{ $t('最多浏览') }}</option>
           </select>
         </div>
       </div>
 
       <div class="row mt12">
-        <button class="btn btn-primary btn-sm" @click="reload(1)">搜索</button>
-        <button class="btn btn-sm" @click="reset">重置</button>
+        <button class="btn btn-primary btn-sm" @click="reload(1)">{{ $t('搜索') }}</button>
+        <button class="btn btn-sm" @click="reset">{{ $t('重置') }}</button>
         <label v-if="auth.school?.cross_school_enabled" class="row small" style="gap:6px;margin:0">
-          <input type="checkbox" v-model="filters.crossSchool" style="width:auto" @change="reload(1)" />
-          包含跨校专区（{{ auth.school.cross_school_mode === 'mail' ? '仅邮寄' : '可跨校' }}）
-        </label>
+          <input type="checkbox" v-model="filters.crossSchool" style="width:auto" @change="reload(1)" />{{ $t('包含跨校专区（{0}）', [auth.school.cross_school_mode === 'mail' ? $t('仅邮寄') : $t('可跨校')]) }}</label>
       </div>
     </div>
 
@@ -59,21 +57,22 @@
         <img v-if="b.cover_url" class="thumb" :src="imageUrl(b.cover_url)" :alt="b.title" />
         <div v-else class="thumb" style="display:flex;align-items:center;justify-content:center">📖</div>
         <div class="bold mt8" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.title }}</div>
-        <div class="small muted">{{ b.course_name || b.author || '未填写课程' }}</div>
+        <div class="small muted">{{ b.course_name || b.author || $t('未填写课程') }}</div>
         <div class="row-between mt8">
           <span class="price">¥{{ yuan(b.price_cents) }}</span>
           <span class="small muted">{{ CONDITION_LABELS[b.condition_level] || b.condition_level }}</span>
         </div>
-        <div class="small muted mt8">{{ b.seller_nickname }} · 信誉 {{ b.seller_credit }}</div>
+        <div class="small muted mt8">{{ $t('{0} · 信誉 {1}', [b.seller_nickname, b.seller_credit]) }}</div>
       </RouterLink>
     </div>
-    <EmptyState v-else text="没有符合条件的教材" icon="🔍" />
+    <EmptyState v-else :text="$t('没有符合条件的教材')" icon="🔍" />
 
     <Pager :page="page" :page-size="pageSize" :total="total" :has-more="hasMore" @change="reload" />
   </div>
 </template>
 
 <script setup>
+import { t } from '../i18n/index.js';
 import { onMounted, reactive, ref } from 'vue';
 import { bookApi } from '../api/index.js';
 import { useAuthStore } from '../stores/auth.js';
@@ -113,7 +112,7 @@ async function reload(nextPage = page.value) {
     list.value = [];
     total.value = 0;
     hasMore.value = false;
-    toastError(err?.message || '教材列表加载失败');
+    toastError(err?.message || t('教材列表加载失败'));
   }
 }
 

@@ -1,0 +1,3 @@
+# SPA 回退：/web/ 下的深链接（如 /web/books/1、/web/admin/tickets）统一交给 web/index.html
+# 已存在的真实文件（js/css/svg）优先命中，不受此规则影响
+/web/*    /web/index.html    200
