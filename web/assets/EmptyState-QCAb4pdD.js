@@ -1,0 +1,1 @@
+import{t as o,q as n,c,a as e,b as s,a2 as r}from"./index-BFTZpxmK.js";const i={class:"empty"},l={style:{"font-size":"28px"}},_={__name:"EmptyState",props:{text:{type:String,default:o("暂无数据")},icon:{type:String,default:"📭"}},setup(t){return(a,p)=>(n(),c("div",i,[e("div",l,s(t.icon),1),e("p",null,s(t.text),1),r(a.$slots,"default")]))}};export{_};

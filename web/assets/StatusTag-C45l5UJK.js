@@ -1,1 +1,0 @@
-import{g as s}from"./format-CzuQ8rEk.js";import{a as r,c as o,t as p,G as c,z as l}from"./index-nyooUSy4.js";const _={__name:"StatusTag",props:{map:{type:Object,required:!0},value:{type:[String,Number],default:""}},setup(e){const a=e,t=l(()=>s(a.map,a.value));return(n,u)=>(r(),o("span",{class:c(["tag",t.value.tag])},p(t.value.label),3))}};export{_};

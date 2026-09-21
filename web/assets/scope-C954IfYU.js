@@ -1,0 +1,1 @@
+import{u as c,a1 as n,A as t}from"./index-BFTZpxmK.js";function a(){const o=c(),e=n(),u=t(()=>{var r;return o.needSchoolPicker?e.currentId||null:((r=o.user)==null?void 0:r.schoolId)||null}),s=t(()=>!!u.value);return{auth:o,school:e,schoolId:u,ready:s}}export{a as u};
